@@ -8,6 +8,7 @@
 
         <!-- Form -->
         <form class="space-y-4">
+            <h2 id="verifyMessage"></h2>
             <!-- Email Field -->
             <div class="relative">
                 <div class="border border-white rounded-xl p-4 flex items-center space-x-2">
@@ -79,19 +80,39 @@
 
 
 
-            <button type="button" id="signUp" class="bg-white w-full h-10 rounded-xl text-black">Create account</button>
+            <button type="button" id="signUp"
+                class="bg-white text-black font-bold hover:bg-gray-200 active:bg-blue-700 transition-all flex justify-center items-center w-full h-10 rounded-xl text-black space-x-1">
 
+                <span id="createText">Create account</span>
+                <span id="loading" class="hidden">
+                    <?php 
+                    include_once "mvc/views/components/Spinner.php"
+                    ?>
+                </span>
+            </button>
         </form>
     </div>
 
 
     <script>
 $(document).ready(function() {
+
     $("#signUp").click(function() {
         let email = $("#email").val();
+
+        localStorage.setItem('email', email);
+
         let password = $("#password").val();
         let name = $("#name").val();
-        
+        const isValidation = checkValidation(
+            'auth',
+            email,
+            name,
+            password
+        )
+        if (!isValidation) return
+
+        $("#loading").removeClass("hidden");
 
         $.ajax({
             url: "/course-work/Auth/signUp",
@@ -103,38 +124,23 @@ $(document).ready(function() {
             },
             success: function(response) {
                 response = JSON.parse(response);
-                console.log(response)
                 if (response.success) {
-                    Toastify({
-                        text: "Sign up successfully",
-                        className: "bg-blue-500 rounded-lg",
-                        duration: 3000,
-                        gravity: "top", // `top` or `bottom`
-                        position: "center",
-                    }).showToast();
+                    $("#loading").addClass("hidden");
+                    sessionStorage.setItem('toastMessage', JSON.stringify({
+                        message: response.message,
+                        type: 'success'
+                    }));
 
-                    setTimeout(() => {
-                        window.location.href = "/course-work/Auth/signIn";
-                    }, 1000);
-                  
+                    window.location.href = "/course-work/Auth/verifyMail";
+
                 } else {
-                    Toastify({
-                        text: response.message,
-                        className: "rounded-lg",
-                        duration: 3000,
-                        gravity: "top",
-                        position: "center",
-                        style: {
-                            background: "red"
-                        }
+                    console.log(response)
+                    showToast(response.message, 'error')
+                    $("#loading").addClass("hidden");
 
-                    }).showToast();
 
                 }
             },
-            error: function(xhr, status, error) {
-                console.error("Error:", error);
-            }
         });
     });
 

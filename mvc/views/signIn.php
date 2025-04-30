@@ -2,10 +2,7 @@
     <!-- Logo -->
     <div class="mb-16">
         <div class="flex items-center">
-            <svg class="w-10 h-10" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M20 0L0 20L20 40L40 20L20 0ZM20 11.5L28.5 20L20 28.5L11.5 20L20 11.5Z" fill="white" />
-            </svg>
-            <span class="ml-2 text-xl font-semibold">daily.dev</span>
+            <img src="/course-work/public/assets/logo.png" alt="Logo" class="w-30 h-20">
         </div>
     </div>
 
@@ -20,7 +17,7 @@
                 <i class="fab fa-facebook-f text-[#1877F2] mr-3"></i>
                 Facebook
             </button>
-            <button
+            <a id="google" href="<?php echo htmlspecialchars($data["googleLoginUrl"]); ?>"
                 class="w-full bg-white text-gray-800 rounded-full py-3 px-4 flex items-center justify-center font-medium">
                 <svg class="w-5 h-5 mr-3" viewBox="0 0 24 24">
                     <path
@@ -37,7 +34,7 @@
                         fill="#EA4335" />
                 </svg>
                 Google
-            </button>
+            </a>
             <button
                 class="w-full bg-white text-gray-800 rounded-full py-3 px-4 flex items-center justify-center font-medium">
                 <i class="fab fa-github text-black mr-3"></i>
@@ -86,27 +83,30 @@
             <span class="text-gray-300">Not a member yet? </span>
             <a href="/course-work/Auth/signUp" class="text-white font-medium">Sign up</a>
         </div>
+        <?php
+        ?>
 
-        <!-- Footer -->
-        <div class="text-xs text-gray-500 flex flex-wrap justify-center gap-4">
-            <span>© 2025 Daily Dev Ltd.</span>
-            <a href="#" class="hover:text-gray-300">Guidelines</a>
-            <a href="#" class="hover:text-gray-300">Explore</a>
-            <a href="#" class="hover:text-gray-300">Tags</a>
-            <a href="#" class="hover:text-gray-300">Sources</a>
-            <a href="#" class="hover:text-gray-300">Squads</a>
-            <a href="#" class="hover:text-gray-300">Leaderboard</a>
-        </div>
     </div>
 </div>
 
 
 <script>
 $(document).ready(function() {
+
     $('#logIn').click(function() {
 
         let email = $('#email').val();
         let password = $('#password').val();
+
+        const isValidation = checkValidation(
+            'auth',
+            email,
+            null,
+            password,
+
+        )
+        if (!isValidation) return
+
 
         $.ajax({
             url: '/course-work/Auth/signIn',
@@ -116,40 +116,28 @@ $(document).ready(function() {
                 password: password
             },
             success: function(response) {
-                console.log(response);
+
                 response = JSON.parse(response);
                 if (response.success) {
-                    Toastify({
-                        text:`Login successful, hello ${response.user}`,
-                        className: "bg-blue-500 rounded-lg",
-                        duration: 3000,
-                        gravity: "top", // `top` or `bottom`
-                        position: "center",
-
-                    }).showToast();
-                    setTimeout(() => {
-                        window.location.href = "/course-work/Home";
-                    }, 1000);
+                    // showToast(response.message, 'success')
+                    sessionStorage.setItem('toastMessage', JSON.stringify({
+                        message: response.message,
+                        type: 'success'
+                    }));
+                    if (response.user.permission_id === 2) {
+                        window.location.href = "/course-work/Admin/Users";
+                        return
+                    }
+                    if (response.user.permission_id === 1) {
+                        window.location.href = "/course-work/Home/getPosts";
+                    }
                 } else {
-                    Toastify({
-                        text: response.message,
-                        className: "rounded-lg",
-                        duration: 3000,
-                        gravity: "top",
-                        position: "center",
-                        style: {
-                            background: "red"
-                        }
-
-                    }).showToast();
+                    showToast(response.message, 'error')
                 }
             },
-            error: function(xhr, status, error) {
-                console.error('Error:', error);
-                alert('An error occurred. Please try again.');
-            }
         });
 
     });
+
 });
 </script>

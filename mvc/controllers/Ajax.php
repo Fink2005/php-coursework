@@ -9,17 +9,6 @@ class Ajax extends Controller {
         $this->PostModel = $this->model("PostModel");
     }
 
-    public function getPostId() {
-        if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["id"])) {
-            $id = intval($_POST["id"]);
-            $post = $this->PostModel->getPostById($id);
-            echo json_encode($post);
-        } else {
-            http_response_code(400);
-            echo json_encode(["error" => "Invalid request"]);
-        }
-    }
-
     public function upload() {
         // Start output buffering to catch any stray output
         ob_start();

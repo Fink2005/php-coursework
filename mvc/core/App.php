@@ -1,30 +1,78 @@
 <?php
-class App {
 
+class App {
     protected $controller = "Home";  // Default controller
     protected $action = "getPosts";  // Default action
     protected $params = [];  // Default parameters
 
     function __construct() {
+        // Configure session cookie parameters
+        session_set_cookie_params([
+            'lifetime' => 0,
+            'path' => '/',
+            'domain' => '',
+            'secure' => false, // Set to true for HTTPS in production
+            'httponly' => true,
+            'samesite' => 'Lax'
+        ]);
+        session_start();
+
         $arr = $this->UrlProcess();
+        // Define protected routes and their role requirements
+        $protectedRoutes = [
+            'Home/getPosts' => ['admin', 'user'], // Homepage for both roles
+            'home' => ['admin', 'user'], // Homepage for both roles
+            'home/getPosts' => ['admin', 'user'], // Homepage for both roles
+            '' => ['admin', 'user'], // Homepage for both roles
+            'Home' => ['admin', 'user'], // Homepage for both roles
+            'Home/CreatePosts' => ['admin', 'user'], // Homepage for both roles
+            'Admin/getUsers' => ['admin'], // Admin-only route
+            'Admin/Dashboard' => ['admin'], // Admin-only route
+            'Admin/Users' => ['admin'] // Admin-only route
+        ];
 
-        // Controller
-        if (!empty($arr) && file_exists("./mvc/controllers/" . $arr[0] . ".php")) {
-            $this->controller = $arr[0];
-            unset($arr[0]);
+        // Extract controller and action for middleware check
+        $controller = !empty($arr) && isset($arr[0]) ? $arr[0] : $this->controller;
+        $action = !empty($arr) && isset($arr[1]) ? $arr[1] : $this->action;
+        $routeKey = $controller . '/' . $action;
+
+        // Handle root URL (/)
+        if (empty($arr)) {
+            $routeKey = 'Home/getPosts';
+            $controller = $this->controller;
+            $action = $this->action;
         }
 
-        require_once "./mvc/controllers/" . $this->controller . ".php";
-        $this->controller = new $this->controller;
-
-        // Action
-        if (!empty($arr) && isset($arr[1]) && method_exists($this->controller, $arr[1])) {
-            $this->action = $arr[1];
-            unset($arr[1]);
+        // Apply middleware for protected routes
+        if (array_key_exists($routeKey, $protectedRoutes)) {
+            Middleware::handle($protectedRoutes[$routeKey]);
         }
 
-        // Params
-        $this->params = !empty($arr) ? array_values($arr) : [];
+        // Check if controller exists
+        if (!file_exists("./mvc/controllers/" . $controller . ".php")) {
+            error_log("404 Error: Controller '$controller' not found for URL: " . ($_GET['url'] ?? '/'));
+            $this->render404();
+            return;
+        }
+
+        require_once "./mvc/controllers/" . $controller . ".php";
+        if (!class_exists($controller)) {
+            error_log("404 Error: Controller class '$controller' not found for URL: " . ($_GET['url'] ?? '/'));
+            $this->render404();
+            return;
+        }
+        $this->controller = new $controller;
+
+        // Check if action exists
+        if (!method_exists($this->controller, $action)) {
+            error_log("404 Error: Action '$action' not found in controller '$controller' for URL: " . ($_GET['url'] ?? '/'));
+            $this->render404();
+            return;
+        }
+
+        // Set action and parameters    
+        $this->action = $action;
+        $this->params = !empty($arr) && count($arr) > 2 ? array_slice($arr, 2) : [];
 
         // Call the controller's method with the parameters
         call_user_func_array([$this->controller, $this->action], $this->params);
@@ -34,6 +82,13 @@ class App {
         if (isset($_GET["url"]) && !empty($_GET["url"])) {
             return explode("/", filter_var(trim($_GET["url"], "/"), FILTER_SANITIZE_URL));
         }
-        return []; // Return an empty array if `$_GET["url"]` is not set
+        return [];
+    }
+
+    protected function render404() {
+        http_response_code(404);
+        include "./mvc/views/notFound/notFound.php";
+        exit;
     }
 }
+?>
