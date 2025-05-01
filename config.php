@@ -1,10 +1,13 @@
 <?php
 use Cloudinary\Configuration\Configuration;
+$dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__, 2));
+$dotenv->safeLoad();
 Configuration::instance([
+    
 'cloud' => [
-'cloud_name' => 'dpwaelhd6',
-'api_key' => '844264381959956',
-'api_secret' => 'xRpzsPBPc9opakSIdZjqxx_KUvc'
+'cloud_name' => $_ENV['CLOUDINARY_CLOUD_NAME'],
+'api_key' => $_ENV['CLOUDINARY_API_KEY'],
+'api_secret' => $_ENV['CLOUDINARY_API_SECRET'],
 ],
 'url' => ['secure' => true]
 ]);
