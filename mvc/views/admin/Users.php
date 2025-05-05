@@ -198,7 +198,7 @@ $(document).ready(function() {
         const verify_status = $('#userStatus').is(':checked') ? 1 : 0;
 
         // Validations
-        checkValidation('auth', email, username, password)
+        checkValidation('auth', email, username, 2)
 
 
         if ((password || (isEditing && newPassword)) && (password.length < 6 || (isEditing &&
@@ -220,7 +220,7 @@ $(document).ready(function() {
 
         // Determine URL and method
         const url = isEditing ? `/course-work/Admin/UpdateUser/${editingUserId}` :
-            '/course-work/Auth/signUp';
+            '/course-work/Admin/signUp';
         $.ajax({
             url,
             type: 'POST',

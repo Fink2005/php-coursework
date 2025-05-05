@@ -3,12 +3,12 @@
         <button id="upvote-btn-detail" aria-label="Upvote" aria-pressed="false" class="  inline-flex hover:text-green-500 cursor-pointer flex-row
         items-center    
         h-8 ">
-
             <?php include './mvc/views/components/icons/UpVote.php' ?>
             <span id="vote-count-detail" class=" px-3">
             </span>
         </button>
-        <button class="downvote-btn-detail  hover:text-red-500  -rotate-180 focus-outline inline-flex cursor-pointer flex-row
+        
+        <button id="downvote-btn-detail" class="hover:text-red-500  -rotate-180 focus-outline inline-flex cursor-pointer flex-row
         items-center    
         iconOnly h-8 w-8 p-0 pointer-events-auto">
             <?php include './mvc/views/components/icons/DownVote.php' ?>

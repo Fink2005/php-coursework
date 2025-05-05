@@ -362,7 +362,7 @@ class Admin extends Controller{
 
         try {
 
-            error_log("SearchTags called with query: '$query'");
+            error_log(message: "SearchTags called with query: '$query'");
             $tags = $tagModel->searchTags($query);
             echo json_encode(['tags' => $tags]);
         } catch (Exception $e) {
@@ -399,6 +399,39 @@ class Admin extends Controller{
                 'message' => 'Method not allowed. Use POST with _method=DELETE.'
             ]);
         }
+    }
+
+
+
+    public function signUp()
+
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Validate input
+            $email = trim($_POST['email'] ?? '');
+            $username = trim($_POST['username'] ?? '');
+            $password = trim($_POST['password'] ?? '');
+            $role = trim($_POST['permission_id'] ?? 1);
+            $status = trim($_POST['verify_status'] ?? 0);
+    
+    
+            // Register user
+            $authModel = $this->model("AuthModel");
+            $result = $authModel->signUp($email, $password, $username, $role, $status);
+    
+         
+            if ($result['status'] === 'success') {
+                echo json_encode(['success' => true, 'message' => 'User created successfully.']);
+
+            }
+            
+            else {
+                echo json_encode([
+                    'success' => false,
+                    'message' => $result['message']
+                ]);
+            }
+        } 
     }
 
 

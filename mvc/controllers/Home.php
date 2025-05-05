@@ -112,9 +112,22 @@ class Home extends Controller{
     }
 
     function UserInfo() {
+        $userModel = $this->model("UserModel");
+        $user = $userModel->getUserById($_SESSION['user']['id']);
+        if ($user && $_SERVER['REQUEST_METHOD'] === 'POST') { 
+            echo json_encode([
+                'success' => true,
+                'data' => $user
+            ]);
+            return;
+
+        }
+   
             $this->view("main", [
                 "Page" => "HomePage",
                 "view" => "UserInfo",
+                'data' => $user
+
             ]);
      
     }

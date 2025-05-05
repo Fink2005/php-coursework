@@ -21,7 +21,6 @@
 
                 <div class="mb-4">
                     <div id="tagsStore" class="hidden border-2  p-1 rounded-lg flex flex-wrap">
-
                     </div>
                 </div>
                 <div class="mb-4 flex items-center justify-center w-full relative">

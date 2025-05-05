@@ -133,25 +133,52 @@
     <script>
     $(document).ready(function() {
         // Safely retrieve PHP session data
-        const email =
-            <?php echo isset($_SESSION['user']['email']) ? json_encode($_SESSION['user']['email']) : '""'; ?>;
-        const username =
-            <?php echo isset($_SESSION['user']['username']) ? json_encode($_SESSION['user']['username']) : '""'; ?>;
-        const avatar =
-            <?php echo isset($_SESSION['user']['avatar']) ? json_encode($_SESSION['user']['avatar']) : '""'; ?>;
-        const userId =
-            <?php echo isset($_SESSION['user']['id']) ? json_encode($_SESSION['user']['id']) : '""'; ?>;
+        let email = null
+ 
+        let username = null
+       
+        let avatar = null
+           
+        let userId = null
+
+            $.ajax({
+                url: `/course-work/Home/UserInfo`,
+                type: 'POST',
+                processData: false,
+                contentType: false,
+                dataType: 'json',
+                success: function(response) {
+                    console.log(response.data)
+                    if (response.success) {
+
+                        email = response.data.email
+                        username = response.data.username
+                        avatar = response.data.avatar
+                        userId = response.data.id
+
+                        $('#emailInput').val(email);
+                        $('#nameInput').val(username);
+                        if (avatar) {
+                            $('#cancelAvatar').removeClass('hidden');
+                            $('#avatar').attr('src', avatar).removeClass('hidden');
+                        } else {
+                            $('#avatar').attr('src', 'https://ui-avatars.com/api/?name=' + (username || 'User')).removeClass(
+                                'hidden');
+                        }
+                    
+                    } else {
+                        showToast(response.message, 'error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    showToast('Error updating user: ' + error, 'error');
+                }
+            });
+
+
 
         // Set initial values
-        $('#emailInput').val(email);
-        $('#nameInput').val(username);
-        if (avatar) {
-            $('#cancelAvatar').removeClass('hidden');
-            $('#avatar').attr('src', avatar).removeClass('hidden');
-        } else {
-            $('#avatar').attr('src', 'https://ui-avatars.com/api/?name=' + (username || 'User')).removeClass(
-                'hidden');
-        }
+    
 
         // Cancel avatar
         $('#cancelAvatar').on('click', function() {
@@ -211,7 +238,6 @@
             }
 
             // Perform validation
-            // const isValidation = checkValidation('auth', email, username, password);
             if ((password || newPassword) && (password.length < 6 ||
                     newPassword.length < 6)) {
                 showToast('Passwords must be at least 6 characters', 'error')
@@ -243,9 +269,6 @@
 
                         showToast(response.message, 'success');
                         // Reload page to refresh session data
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1000); // Delay to allow toast to be visible
                     } else {
                         showToast(response.message, 'error');
                     }

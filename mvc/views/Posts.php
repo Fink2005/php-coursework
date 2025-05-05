@@ -56,7 +56,6 @@
                 </div>
                 <?php endif; ?>
 
-
                 <p> <span class="post-created-at text-[#A8B3CF] text-xs font-light"
                         data-created-at="<?php echo htmlspecialchars($post['created_at']); ?>"></span></p>
             </div>
@@ -71,9 +70,6 @@
         </div>
 
         <?php endforeach; ?>
-
-
-
     </div>
     <script>
     let currentPage = 1;
@@ -131,6 +127,54 @@
             });
 
         });
+
+
+
+
+        $('#upvote-btn-detail').click(function() {
+        $.post(`/course-work/Home/vote/${postId}/upvote`, function(response) {
+            if (response.success) {
+                console.log(response)
+
+                $(`#vote-count-detail`).text(response.vote_count.upvotes -
+                    response.vote_count.downvotes);
+                const upvoteIcon = $(`#upvote-btn-detai`);
+                const downvoteIcon = $(`#downvote-btn-detail`);
+                upvoteIcon.removeClass('text-green-500');
+                upvoteIcon.addClass(response.user_vote_type === 'upvote' ?
+                    'text-green-500' :
+                    '');
+                downvoteIcon.removeClass(response.user_vote_type === 'upvote' &&
+                    'text-red-500');
+                showToast(response.message, 'success');
+            } else {
+                showToast(response.message, 'error');
+            }
+        });
+    });
+
+    $('#downvote-btn-detail').click(function() {
+        $.post(`/course-work/Home/vote/${postId}/downvote`, function(response) {
+            if (response.success && response.message !== 'No action taken') {
+                $(`.vote-count[data-post-id=${postId}]`).text(response.vote_count.upvotes -
+                    response.vote_count.downvotes);
+                const upvoteIcon = $(`.upvote-btn[data-post-id=${postId}]`);
+                const downvoteIcon = $(`.downvote-btn[data-post-id=${postId}]`);
+                upvoteIcon.removeClass('text-green-500');
+                upvoteIcon.addClass(response.user_vote_type === 'upvote' ?
+                    'text-green-500' :
+                    '');
+                downvoteIcon.addClass(response.user_vote_type !== 'upvote' &&
+                    'text-red-500');
+                showToast(response.message, 'success');
+            } else if (response.success) {
+                showToast('No vote to remove', 'info');
+            } else {
+                showToast(response.message, 'error');
+            }
+        });
+    });
+
 
 
 

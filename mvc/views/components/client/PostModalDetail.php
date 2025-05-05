@@ -94,57 +94,6 @@ $(document).ready(function() {
     // Replace with actual post ID passed from controller or extracted from URL
 
 
-
-
-
-    $('.upvote-btn-detail').click(function() {
-        const postId = $(this).data('post-id');
-        $.post(`/course-work/Home/vote/${postId}/upvote`, function(response) {
-            if (response.success) {
-                console.log(response)
-
-                $(`.vote-count[data-post-id=${postId}]`).text(response.vote_count.upvotes -
-                    response.vote_count.downvotes);
-                const upvoteIcon = $(`.upvote-btn[data-post-id=${postId}]`);
-                const downvoteIcon = $(`.downvote-btn[data-post-id=${postId}]`);
-                upvoteIcon.removeClass('text-green-500');
-                upvoteIcon.addClass(response.user_vote_type === 'upvote' ?
-                    'text-green-500' :
-                    '');
-                downvoteIcon.removeClass(response.user_vote_type === 'upvote' &&
-                    'text-red-500');
-                showToast(response.message, 'success');
-            } else {
-                showToast(response.message, 'error');
-            }
-        });
-    });
-
-    $('.downvote-btn-detail').click(function() {
-        const postId = $(this).data('post-id');
-        $.post(`/course-work/Home/vote/${postId}/downvote`, function(response) {
-            if (response.success && response.message !== 'No action taken') {
-                $(`.vote-count[data-post-id=${postId}]`).text(response.vote_count.upvotes -
-                    response.vote_count.downvotes);
-                const upvoteIcon = $(`.upvote-btn[data-post-id=${postId}]`);
-                const downvoteIcon = $(`.downvote-btn[data-post-id=${postId}]`);
-                upvoteIcon.removeClass('text-green-500');
-                upvoteIcon.addClass(response.user_vote_type === 'upvote' ?
-                    'text-green-500' :
-                    '');
-                downvoteIcon.addClass(response.user_vote_type !== 'upvote' &&
-                    'text-red-500');
-                showToast(response.message, 'success');
-            } else if (response.success) {
-                showToast('No vote to remove', 'info');
-            } else {
-                showToast(response.message, 'error');
-            }
-        });
-    });
-
-
-
     // Tab switching functionality
     $("#preview-tab").click(function() {
         $(this).removeClass("text-gray-500").addClass("text-white border-b-2 border-white");

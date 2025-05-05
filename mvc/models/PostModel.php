@@ -94,6 +94,32 @@ class PostModel extends DB {
     }
 
 
+//here
+    public function search($keyword) {
+        $keyword = '%' . $keyword . '%'; // Wildcard for LIKE
+        $query = "
+            SELECT DISTINCT p.id, p.name, p.content, GROUP_CONCAT(t.name) as tags
+            FROM posts p
+            LEFT JOIN tags_post tp ON p.id = tp.post_id
+            LEFT JOIN tags t ON tp.tag_id = t.id
+            WHERE p.title LIKE :keyword
+               OR p.content LIKE :keyword
+               OR t.name LIKE :keyword
+            GROUP BY p.id, p.title, p.content
+            ORDER BY p.created_at DESC
+        ";
+
+        try {
+            $stmt = $this->con->prepare($query);
+            $stmt->bindParam(':keyword', $keyword, PDO::PARAM_STR);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            // Log error in production
+            return [];
+        }
+    }
+
     public function getPostById($id, $user_id = null) {
         $query = "
             SELECT 

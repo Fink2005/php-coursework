@@ -10,6 +10,17 @@ class UserModel extends DB {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+
+    public function getUserById($id) {
+        $query = "SELECT id, avatar, username, email, permission_id, verify_status, created_at FROM users WHERE id = :id";
+        $stmt = $this->con->prepare($query);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+
     // public function updateUser($id, $data = []) {
     //     if (empty($data)) {
     //         return ['status' => false, 'message' => 'No data provided'];
@@ -162,7 +173,16 @@ class UserModel extends DB {
                     if (session_status() === PHP_SESSION_NONE) {
                         session_start();
                     }
-                    $_SESSION['user'] = $user;
+                    $url = $_SERVER['REQUEST_URI'];
+                    $segments = explode('/', trim($url, '/'));
+                    
+                    // Check if "Admin" is a segment in the URL
+                    if (!in_array('Admin', $segments)) {
+                        // URL does NOT contain "Admin" as a segment
+                        $_SESSION['user'] = $user; // Assume $user is defined
+                     
+                    } 
+                    
 
                     return [
                         'success' => true,
