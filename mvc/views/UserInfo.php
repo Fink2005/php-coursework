@@ -34,7 +34,12 @@
         <div class="flex justify-between items-center p-6 border-b border-gray-700">
             <h1 class="text-3xl font-bold text-white">Profile</h1>
             <button id="saveBtn"
-                class="bg-white text-black font-semibold px-6 py-2 rounded-full hover:bg-gray-200 transition-colors duration-200">Save</button>
+                class="bg-white text-black font-semibold px-6 py-2 rounded-full hover:bg-gray-200 transition-colors duration-200">
+                <span id="saveText">Save</span>
+                <span class="hidden" id="loading">
+                        <?php include 'mvc/views/components/Spinner.php'; ?>
+                    </span>
+            </button>
         </div>
 
         <!-- Profile Picture Section -->
@@ -58,7 +63,7 @@
                         <input type="file" id="profilePicInput" class="hidden" accept="image/*">
                     </div>
                     <div>
-                        <label for="coverImageInput" class="cursor-pointer w-[50%] group">
+                        <label id="clickAvatar" class="cursor-pointer w-[50%] group">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto text-gray-400" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -67,7 +72,7 @@
                                     d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                             <p class="mt-2 text-gray-400">Upload cover image</p>
-                            <input type="file" id="coverImageInput" class="hidden" accept="image/*">
+                            <!-- <input type="file" id="coverImageInput" class="hidden" accept="image/*"> -->
                         </label>
                     </div>
                 </div>
@@ -133,8 +138,9 @@
     <script>
     $(document).ready(function() {
         // Safely retrieve PHP session data
+        let isImage = false
+
         let email = null
- 
         let username = null
        
         let avatar = null
@@ -176,12 +182,16 @@
             });
 
 
-
+        $('#clickAvatar').on('click', function() {
+            $('#profilePicInput').click();
+        });
         // Set initial values
+
     
 
         // Cancel avatar
         $('#cancelAvatar').on('click', function() {
+            isImage = true
             $('#avatar').attr('src', 'https://ui-avatars.com/api/?name=' + (username || 'User'))
                 .removeClass('hidden');
             $('#cancelAvatar').addClass('hidden');
@@ -189,11 +199,9 @@
         });
 
         // Handle profile picture upload
-        $('#profilePicUpload').click(function() {
-            $('#profilePicInput').click();
-        });
-
-        $('#profilePicInput').change(function(e) {
+   
+        $('#profilePicInput').change(async function(e) {
+            isImage = true
             if (e.target.files && e.target.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -204,32 +212,18 @@
             }
         });
 
-        // Handle cover image upload
-        $('#coverImageUpload').click(function() {
-            $('#coverImageInput').click();
-        });
-
-        $('#coverImageInput').change(function(e) {
-            if (e.target.files && e.target.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    $('#coverImageUpload').css({
-                        'background-image': `url(${e.target.result})`,
-                        'background-size': 'cover',
-                        'background-position': 'center'
-                    }).empty();
-                };
-                reader.readAsDataURL(e.target.files[0]);
-            }
-        });
+      
 
         // Save button functionality
-        $('#saveBtn').click(function() {
+        $('#saveBtn').click(async function() {
+            $('#loading').removeClass('hidden');
+            $('#saveText').addClass('hidden');
             const username = $('#nameInput').val();
             const email = $('#emailInput').val();
             const password = $('#passwordInput').val();
             const newPassword = $('#newPasswordInput').val();
-            const avatarFile = $('#profilePicInput')[0].files[0];
+
+
 
             // Validate new password length
             if (newPassword.length > 0 && newPassword.length < 6) {
@@ -243,18 +237,28 @@
                 showToast('Passwords must be at least 6 characters', 'error')
                 return;
             }
+            const formData = new FormData();
+
+
+            
+                if (isImage && $('#avatar').attr('src') ) {
+            let formDataImage = new FormData();
+            formDataImage.append('file', $('#profilePicInput')[0].files[0]);
+               const isSuccess = await handleUploadImage(formDataImage)
+                if (isSuccess) {
+                    console.log({isSuccess})
+                formData.append('avatar', isSuccess);
+                } 
+                }
 
 
             // Use FormData to handle file uploads
-            const formData = new FormData();
             formData.append('email', email);
             formData.append('username', username);
             formData.append('password', password);
             formData.append('newPassword', newPassword);
-            if (avatarFile) {
-                formData.append('avatar', avatarFile);
-            }
 
+           
             // Send update request
             $.ajax({
                 url: `/course-work/Admin/UpdateUser/${userId}`,
@@ -267,7 +271,12 @@
                     console.log(response)
                     if (response.success) {
 
+                        $('#avatarDropdown').attr('src', response.user_data.avatar)
+                        $('#avatarSidebar').attr('src', response.user_data.avatar)
+      
                         showToast(response.message, 'success');
+                        $('#loading').addClass('hidden');
+                        $('#saveText').removeClass('hidden');
                         // Reload page to refresh session data
                     } else {
                         showToast(response.message, 'error');

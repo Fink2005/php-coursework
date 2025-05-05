@@ -43,13 +43,18 @@ class Admin extends Controller{
                 'email' => $_POST['email'] ?? '',
                 'username' => $_POST['username'] ?? '',
                 'password' => $_POST['password'] ?? '',
+                'avatar' => $_POST['avatar'] ?? '',
                 'newPassword' => $_POST['newPassword'] ?? '',
                 'permission_id' => $_POST['permission_id'] ?? '',
                 'verify_status' => $_POST['verify_status'] ?? ''
             ];
             $userModel = $this->model("UserModel");
             $result = $userModel->updateUser($id, $data);
-    
+            if ($result['success'] && $_SESSION['user']['id'] == $result["user_id"]) {
+                $_SESSION['user']['username'] = $result["data"]['username'];
+                $_SESSION['user']['email'] = $result["data"]['email'];
+                $_SESSION['user']['avatar'] = $result["data"]['avatar'];
+            }
             echo json_encode([
                 "success" => $result["success"],
                 "message" => $result["message"],

@@ -43,6 +43,7 @@ class PostModel extends DB {
             LEFT JOIN votes v ON v.post_id = p.id
             LEFT JOIN votes v2 ON v2.post_id = p.id AND v2.user_id = :user_id
             GROUP BY p.id
+            ORDER BY RAND()
         ";
         $stmt = $this->con->prepare($query);
         $stmt->execute(['user_id' => $user_id ?: 0]); // Use 0 if no user_id to avoid null issues
@@ -158,6 +159,44 @@ class PostModel extends DB {
         }
 
         return $post ?: []; // Return empty array if no post found
+    }
+
+
+    public function getPostsByUserId($userId) {
+        try {
+            $query = "
+                SELECT 
+                    p.id,
+                    p.name,
+                    p.image_url,
+                    p.post_url,
+                    p.des,
+                    p.user_id,
+                    p.created_at,
+                    p.updated_at,
+                    u.username,
+                    u.avatar,
+                    COALESCE(SUM(CASE 
+                        WHEN v.vote_type = 'upvote' THEN 1 
+                        WHEN v.vote_type = 'downvote' THEN -1 
+                        ELSE 0 
+                    END), 0) as total_votes
+                FROM Posts p
+                INNER JOIN users u ON p.user_id = u.id
+                LEFT JOIN votes v ON v.post_id = p.id
+                WHERE p.user_id = :userId
+                GROUP BY p.id, p.name, p.image_url, p.post_url, p.des, p.user_id, p.created_at, p.updated_at, u.username, u.avatar
+                ORDER BY p.created_at DESC
+            ";
+
+            $stmt = $this->con->prepare($query);
+            $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+            $stmt->execute();
+            
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new Exception("Database error: " . $e->getMessage());
+        }
     }
 
     public function updatePost($postId, $data) {

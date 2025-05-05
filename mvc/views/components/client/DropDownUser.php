@@ -1,6 +1,6 @@
 <div class="size-10 rounded-lg overflow-hidden" id="dropdownHoverButton" data-dropdown-toggle="dropdownHover"
     data-dropdown-trigger="hover">
-    <img class="size-full"
+    <img id="avatarDropdown" class="size-full"
         src="<?php
             echo $_SESSION['user']['avatar'] ? $_SESSION['user']['avatar'] : 'https://ui-avatars.com/api/?name=' . $_SESSION['user']['username'] ?>"
         alt="">

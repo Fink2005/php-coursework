@@ -24,7 +24,7 @@
                 <a href="/course-work/Home"
                     class="inline-flex px-2 items-center space-x-2 hover:bg-gray-700 py-1 rounded-lg w-full">
 
-                    <img class="size-8 rounded-lg"
+                    <img id="avatarSidebar" class="size-8 rounded-lg"
                         src="<?php
             echo $_SESSION['user']['avatar'] ? $_SESSION['user']['avatar'] : 'https://ui-avatars.com/api/?name=' . $_SESSION['user']['username'] ?>"
                         alt="">
@@ -33,6 +33,11 @@
                 </a>
 
 
+            </li>
+            <li>
+                <a href="/course-work/Home/UserPosts"
+                    class="inline-flex px-2 items-center space-x-2 hover:bg-gray-700 py-1 rounded-lg w-full text-white">
+                    <i class="fa-solid fa-blog"></i> <span>Your Posts</span></a>
             </li>
             <li>
                 <a href="/course-work/Home/UserInfo"

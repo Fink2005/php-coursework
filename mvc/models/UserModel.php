@@ -13,7 +13,7 @@ class UserModel extends DB {
 
 
     public function getUserById($id) {
-        $query = "SELECT id, avatar, username, email, permission_id, verify_status, created_at FROM users WHERE id = :id";
+        $query = "SELECT id,avatar, username, email, permission_id, verify_status, created_at FROM users WHERE id = :id";
         $stmt = $this->con->prepare($query);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
@@ -88,13 +88,10 @@ class UserModel extends DB {
 
 
 
-    public function updateUser($id, $data = [], $files = []) {
-        if (empty($data) && empty($files)) {
-            return ['success' => false, 'message' => 'No data provided'];
-        }
+    public function updateUser($id, $data = []) {
 
         // Define allowed fields (excluding password and avatar)
-        $allowedFields = ['username', 'email', 'permission_id', 'verify_status'];
+        $allowedFields = ['username', 'email', 'permission_id', 'verify_status','avatar'];
         $setParts = [];
         $params = [':id' => $id];
 
@@ -112,21 +109,7 @@ class UserModel extends DB {
         }
 
         // Handle avatar upload
-        if (isset($files['avatar']) && $files['avatar']['error'] === UPLOAD_ERR_OK) {
-            $uploadDir = 'uploads/avatars/';
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
-            }
-            $fileName = uniqid() . '_' . basename($files['avatar']['name']);
-            $uploadPath = $uploadDir . $fileName;
 
-            if (move_uploaded_file($files['avatar']['tmp_name'], $uploadPath)) {
-                $setParts[] = "avatar = :avatar";
-                $params[':avatar'] = $uploadPath;
-            } else {
-                return ['success' => false, 'message' => 'Failed to upload avatar'];
-            }
-        }
 
         // Handle password update
         if (isset($data['password']) && isset($data['newPassword']) && $data['newPassword'] !== '') {
@@ -170,20 +153,6 @@ class UserModel extends DB {
 
                 if ($user) {
                     // Update session
-                    if (session_status() === PHP_SESSION_NONE) {
-                        session_start();
-                    }
-                    $url = $_SERVER['REQUEST_URI'];
-                    $segments = explode('/', trim($url, '/'));
-                    
-                    // Check if "Admin" is a segment in the URL
-                    if (!in_array('Admin', $segments)) {
-                        // URL does NOT contain "Admin" as a segment
-                        $_SESSION['user'] = $user; // Assume $user is defined
-                     
-                    } 
-                    
-
                     return [
                         'success' => true,
                         'message' => 'User updated successfully',

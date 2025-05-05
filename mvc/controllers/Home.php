@@ -27,6 +27,49 @@ class Home extends Controller{
             echo json_encode(["error" => "Invalid request"]);
         }
     }
+
+    public function UserPosts() {
+        $userId = $_SESSION['user']['id'] ?? null; // Get user ID from session
+        $posts = $this->model("PostModel");
+
+        try {
+
+            // Get posts from model
+            $post = $posts->getPostsByUserId($userId);
+
+            // Check if posts exist
+            if (empty($post)) {
+                return $this->view("main", [   
+                    "Page"=>"HomePage",
+                    "view"=> "MyPosts",
+                    'message' => 'No posts found for this user',
+                    // "allPosts" => [],
+                ]);
+
+            }
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                echo json_encode([
+                    'success' => true,
+                    'data' => $post
+                ]);
+                return;
+            }
+
+            return $this->view("main", [   
+                "Page"=>"HomePage",
+                "view"=> "MyPosts",
+                'message' => 'No posts found for this user',
+            ]);
+
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            return json_encode([
+                'success' => false,
+                'message' => 'Internal server error: ' . $e->getMessage()
+            ]);
+        }
+    }
     
     public function comment($id) {
         $posts = $this->model("CommentModel");
