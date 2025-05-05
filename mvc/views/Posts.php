@@ -177,7 +177,6 @@
             const content = $("#comment-input").val().trim();
             const image_url = $("#previewImg").attr('src') ?? ''
 
-
             const filterComment = content.replace(/url\([^)]+\)/g, '');
             if (!filterComment) {
                 showToast("Please enter a comment.", 'error');
@@ -222,7 +221,7 @@
                 <div class="border border-[#2D323C] rounded-xl w-[90%] rounded-lg p-4 mb-2">
                     <div class="mr-3 flex items-center space-x-1">
                         <div class="size-9 rounded-xl overflow-hidden">
-                            <img src="${comment.avatar ? comment.avatar : `https://ui-avatars.com/api/?name=${comment.username}`}" class="size-full" alt="${comment.username}">
+                            <img src="${comment.avatar ? comment.avatar : `https://ui-avatars.com/api/?name=${comment.username}`}" class="size-full object-cover" alt="${comment.username}">
                         </div>
                        <div>
                              <p class="text-white font-medium">${comment.username}</p>
@@ -234,7 +233,6 @@
                         <p class="text-gray-300 mt-2">${comment.content}</p>
 
                 ${comment.image_url ? `<img src="${comment.image_url}" class="mt-2 size-28 rounded-lg" alt="Comment image">` : ''}
-
                 </div>
             `;
             });

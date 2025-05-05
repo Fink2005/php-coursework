@@ -15,7 +15,7 @@ class Auth extends Controller
 
     public function __construct()
     {
-        $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__, 2));
+        $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__, levels: 2));
         $dotenv->safeLoad();
         $this->googleClientId = $_ENV['GOOGLE_CLIENT_ID'] ?? '';
         $this->googleSecret = $_ENV['GOOGLE_CLIENT_SECRET'] ?? '';
