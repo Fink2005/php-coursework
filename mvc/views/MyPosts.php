@@ -22,7 +22,7 @@
 <body>
     <section>
         <div class="flex justify-center w-full">
-            <div class="md:min-w-[700px] min-h-[600px] border rounded-md p-10 bg-gray-800">
+            <div id="targetBorder" class="md:min-w-[700px] min-h-[600px] rounded-md p-10 ">
                 <!-- Include the modal -->
                 <?php include "mvc/views/components/admin/postModal.php"; ?>
                 <!-- Posts container -->
@@ -46,7 +46,7 @@
                         if (response.success) {
                             const posts = response.data;
                             
-
+                            $('#targetBorder').addClass('border')
                             const $container = $('#posts-container');
                             $container.empty();
 
@@ -129,7 +129,9 @@
                         }
                     },
                     error: function(xhr) {
-                        $('#posts-container').html('<p class="text-red-500 text-center">Error loading posts: ' + (xhr.responseJSON?.message || 'Server error') + '</p>');
+                        $('#targetBorder').removeClass('border')
+
+                        $('#posts-container').html('<p class="text-blue-500 text-center">Add your new post</p>');
                     }
                 });
             }
